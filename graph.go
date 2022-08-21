@@ -2,6 +2,7 @@ package graph
 
 import (
 	"errors"
+	"fmt"
 )
 
 type vertex struct {
@@ -43,6 +44,13 @@ func (g *Graph) AddEdge(vOneIdx, vTwoIdx, weight int) error {
 	vertexTwo.edges = append(vertexTwo.edges, edgeTwo)
 
 	return nil
+}
+
+func (g *Graph) PrintNeighbhors(vertexIdx int) {
+	fmt.Printf("Neighbors for vertex with index %d\n", vertexIdx)
+	for _, edge := range g.v[vertexIdx].edges {
+		fmt.Printf("Weight: %d Vertex Idx: %d\n", edge.weight, edge.neighbor.idx)
+	}
 }
 
 func contains(edges []*edge, searchIdx int) bool {
