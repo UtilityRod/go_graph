@@ -55,7 +55,7 @@ func (g *Graph) PrintNeighbhors(vertexIdx int) {
 	}
 }
 
-func (g *Graph) Dijkstra(start int, end int) {
+func (g *Graph) Dijkstra(start int, end int) []int {
 	var prev []*vertex
 	var dist []int
 	var queue []*vertex
@@ -63,7 +63,7 @@ func (g *Graph) Dijkstra(start int, end int) {
 	// Set prev and dist slices to null values
 	for i := 0; i < len(g.v); i++ {
 		prev = append(prev, nil)
-		dist = append(dist, -1)
+		dist = append(dist, 100000)
 		queue = append(queue, g.v[i])
 	}
 
@@ -71,13 +71,17 @@ func (g *Graph) Dijkstra(start int, end int) {
 
 	for len(queue) != 0 {
 		currentIdx := -1
-		for idx := range queue {
-			if currentIdx == -1 || dist[currentIdx] < dist[idx] {
-				currentIdx = idx
+		removeIdx := -1
+
+		for idx, v := range queue {
+			if currentIdx == -1 || dist[currentIdx] > dist[v.idx] {
+				removeIdx = idx
+				currentIdx = v.idx
 			}
 		}
 
-		queue = remove(queue, currentIdx)
+		queue = remove(queue, removeIdx)
+
 		for _, edge := range g.v[currentIdx].edges {
 			if !containsVertex(queue, edge.neighbor.idx) {
 				continue
@@ -91,7 +95,14 @@ func (g *Graph) Dijkstra(start int, end int) {
 		}
 	}
 
-	fmt.Println(prev)
+	currentVertex := g.v[end]
+	var path []int
+	for currentVertex != g.v[start] {
+		path = append(path, currentVertex.idx)
+		currentVertex = prev[currentVertex.idx]
+	}
+
+	return path
 }
 
 func remove(slice []*vertex, s int) []*vertex {
