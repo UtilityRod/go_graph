@@ -2,12 +2,16 @@ package graph
 
 import (
 	"errors"
-	"fmt"
 )
 
 type vertex struct {
-	idx       uint64
-	neighbors []*vertex
+	idx   int
+	edges []*edge
+}
+
+type edge struct {
+	neighbor *vertex
+	weight   int
 }
 
 type Graph struct {
@@ -16,36 +20,35 @@ type Graph struct {
 
 func (g *Graph) AddVertex() {
 	newVertex := new(vertex)
-	newVertex.idx = uint64(len(g.v))
+	newVertex.idx = int(len(g.v))
 	g.v = append(g.v, newVertex)
 }
 
-func (g *Graph) AddEdge(vOneIdx, vTwoIdx uint64) error {
+func (g *Graph) AddEdge(vOneIdx, vTwoIdx, weight int) error {
 	vertexOne := g.v[vOneIdx]
 	vertexTwo := g.v[vTwoIdx]
 
-	if contains(vertexOne.neighbors, vTwoIdx) || contains(vertexTwo.neighbors, vOneIdx) {
+	if contains(vertexOne.edges, vTwoIdx) || contains(vertexTwo.edges, vOneIdx) {
 		return errors.New("vertecies already contain edge to each other")
 	}
 
-	vertexOne.neighbors = append(vertexOne.neighbors, vertexTwo)
-	vertexTwo.neighbors = append(vertexTwo.neighbors, vertexOne)
+	edgeOne := new(edge)
+	edgeOne.weight = weight
+	edgeOne.neighbor = vertexTwo
+	vertexOne.edges = append(vertexOne.edges, edgeOne)
+
+	edgeTwo := new(edge)
+	edgeTwo.weight = weight
+	edgeTwo.neighbor = vertexOne
+	vertexTwo.edges = append(vertexTwo.edges, edgeTwo)
 
 	return nil
 }
 
-func (g *Graph) PrintNeighbhors(vIdx uint64) {
-	vertex := g.v[vIdx]
-	fmt.Printf("Neighbors for vertex with index %d\n", vIdx)
-	for _, neighbor := range vertex.neighbors {
-		fmt.Println(neighbor.idx)
-	}
-}
+func contains(edges []*edge, searchIdx int) bool {
 
-func contains(neighbhors []*vertex, searchIdx uint64) bool {
-
-	for _, v := range neighbhors {
-		if v.idx == searchIdx {
+	for _, edge := range edges {
+		if edge.neighbor.idx == searchIdx {
 			return true
 		}
 	}
