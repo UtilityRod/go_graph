@@ -6,8 +6,9 @@ import (
 )
 
 type vertex struct {
-	idx   int
-	edges []*edge
+	idx     int
+	edges   []*edge
+	visited bool
 }
 
 type edge struct {
@@ -22,6 +23,7 @@ type Graph struct {
 func (g *Graph) AddVertex() {
 	newVertex := new(vertex)
 	newVertex.idx = int(len(g.v))
+	newVertex.visited = false
 	g.v = append(g.v, newVertex)
 }
 
@@ -51,6 +53,59 @@ func (g *Graph) PrintNeighbhors(vertexIdx int) {
 	for _, edge := range g.v[vertexIdx].edges {
 		fmt.Printf("Weight: %d Vertex Idx: %d\n", edge.weight, edge.neighbor.idx)
 	}
+}
+
+func (g *Graph) Dijkstra(start int, end int) {
+	var prev []*vertex
+	var dist []int
+	var queue []*vertex
+
+	// Set prev and dist slices to null values
+	for i := 0; i < len(g.v); i++ {
+		prev = append(prev, nil)
+		dist = append(dist, -1)
+		queue = append(queue, g.v[i])
+	}
+
+	dist[start] = 0
+
+	for len(queue) != 0 {
+		currentIdx := -1
+		for idx := range queue {
+			if currentIdx == -1 || dist[currentIdx] < dist[idx] {
+				currentIdx = idx
+			}
+		}
+
+		queue = remove(queue, currentIdx)
+		for _, edge := range g.v[currentIdx].edges {
+			if !containsVertex(queue, edge.neighbor.idx) {
+				continue
+			}
+
+			alt := dist[currentIdx] + edge.weight
+			if alt < dist[edge.neighbor.idx] {
+				dist[edge.neighbor.idx] = alt
+				prev[edge.neighbor.idx] = g.v[currentIdx]
+			}
+		}
+	}
+
+	fmt.Println(prev)
+}
+
+func remove(slice []*vertex, s int) []*vertex {
+	return append(slice[:s], slice[s+1:]...)
+}
+
+func containsVertex(slice []*vertex, s int) bool {
+	for _, vertex := range slice {
+		if vertex.idx == s {
+			return true
+		}
+	}
+
+	return false
 }
 
 func contains(edges []*edge, searchIdx int) bool {
